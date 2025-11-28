@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Tính Xác Suất Toán 12</title>
+
+    <style>
+        body {
+            font-family: "Segoe UI", Arial;
+            background: linear-gradient(135deg, #7f7fff, #a3c7ff);
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 780px;
+            background: white;
+            padding: 30px 35px;
+            border-radius: 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from {opacity:0; transform: translateY(10px);}
+            to {opacity:1; transform: translateY(0);}
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 28px;
+            color: #333;
+        }
+
+        .box {
+            background: #f7faff;
+            padding: 20px;
+            border-radius: 16px;
+            margin-top: 25px;
+            border: 1px solid #d0ddff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.07);
+            transition: 0.25s;
+        }
+
+        .box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #2b4eff;
+            font-size: 22px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, select {
+            padding: 10px;
+            width: 100%;
+            margin: 10px 0 15px;
+            font-size: 15px;
+            border-radius: 10px;
+            border: 1px solid #aac4ff;
+            background: #fbfdff;
+            transition: 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: #4b6bff;
+            box-shadow: 0 0 6px rgba(75,107,255,0.4);
+            outline: none;
+        }
+
+        button {
+            padding: 12px 22px;
+            font-size: 16px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #536dff, #7a91ff);
+            border: none;
+            color: white;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: 0.25s;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: scale(1.03);
+            background: linear-gradient(135deg, #425aff, #6a84ff);
+        }
+
+        #coinResult, #diceResult, #bothResult {
+            margin-top: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #222;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>✨ Tính Xác Suất – Toán 12 ✨</h1>
+
+    <!-- ================== 1. XÁC SUẤT ĐỒNG XU ====================== -->
+    <div class="box">
+        <h2>🎯 Xác suất tung đồng xu</h2>
+
+        <label>Mặt mong muốn:</label>
+        <select id="coinFace">
+            <option value="sap">Sấp</option>
+            <option value="ngua">Ngửa</option>
+        </select>
+
+        <label>Số lần tung:</label>
+        <input type="number" id="coinTimes" min="1">
+
+        <label>Số lần xuất hiện:</label>
+        <input type="number" id="coinK" min="0">
+
+        <button onclick="calculateCoin()">Tính xác suất</button>
+        <div id="coinResult"></div>
+    </div>
+
+
+
+    <!-- ================== 2. XÁC SUẤT XÚC XẮC ====================== -->
+    <div class="box">
+        <h2>🎲 Xác suất tung xúc xắc 6 mặt</h2>
+
+        <label>Mặt muốn ra (1–6):</label>
+        <input type="number" id="diceFace" min="1" max="6">
+
+        <label>Số lần tung:</label>
+        <input type="number" id="diceTimes" min="1">
+
+        <label>Số lần xuất hiện:</label>
+        <input type="number" id="diceK" min="0">
+
+        <button onclick="calculateDice()">Tính xác suất</button>
+        <div id="diceResult"></div>
+    </div>
+
+
+
+    <!-- ================== 3. KẾT HỢP ====================== -->
+    <div class="box">
+        <h2>🟦 Xác suất đồng xu + xúc xắc</h2>
+
+        <h3>→ Đồng xu</h3>
+        <label>Mặt:</label>
+        <select id="cxFace">
+            <option value="sap">Sấp</option>
+            <option value="ngua">Ngửa</option>
+        </select>
+
+        <label>Số lần tung:</label>
+        <input type="number" id="cxTimes" min="1">
+
+        <label>Số lần xuất hiện:</label>
+        <input type="number" id="cxK" min="0">
+
+
+        <h3>→ Xúc xắc</h3>
+        <label>Mặt (1–6):</label>
+        <input type="number" id="dxFace" min="1" max="6">
+
+        <label>Số lần tung:</label>
+        <input type="number" id="dxTimes" min="1">
+
+        <label>Số lần xuất hiện:</label>
+        <input type="number" id="dxK" min="0">
+
+        <button onclick="calculateBoth()">Tính xác suất chung</button>
+        <div id="bothResult"></div>
+    </div>
+
+</div>
+
+
+<!-- ================== JAVASCRIPT ====================== -->
+<script>
+
+    function combination(n, k) {
+        if (k < 0 || k > n) return 0;
+        let r = 1;
+        for (let i = 1; i <= k; i++) r *= (n - i + 1) / i;
+        return r;
+    }
+
+    function calculateCoin() {
+        let n = coinTimes.valueAsNumber;
+        let k = coinK.valueAsNumber;
+        if (!n || k < 0 || k > n) { coinResult.innerHTML = "⚠ Dữ liệu sai!"; return; }
+        let P = combination(n, k) * Math.pow(1/2, n);
+        coinResult.innerHTML = "👉 Xác suất = <b>" + P.toFixed(6) + "</b>";
+    }
+
+    function calculateDice() {
+        let n = diceTimes.valueAsNumber;
+        let k = diceK.valueAsNumber;
+        let face = diceFace.valueAsNumber;
+        if (!n || k < 0 || k > n || face < 1 || face > 6) {
+            diceResult.innerHTML = "⚠ Dữ liệu sai!";
+            return;
+        }
+        let P = combination(n, k) * Math.pow(1/6, k) * Math.pow(5/6, n - k);
+        diceResult.innerHTML = "👉 Xác suất = <b>" + P.toFixed(6) + "</b>";
+    }
+
+    function calculateBoth() {
+        let n1 = cxTimes.valueAsNumber;
+        let k1 = cxK.valueAsNumber;
+        let n2 = dxTimes.valueAsNumber;
+        let k2 = dxK.valueAsNumber;
+        let f2 = dxFace.valueAsNumber;
+
+        if (!n1 || !n2 || k1 < 0 || k2 < 0 || k1 > n1 || k2 > n2 || f2 < 1 || f2 > 6) {
+            bothResult.innerHTML = "⚠ Dữ liệu sai!";
+            return;
+        }
+
+        let P1 = combination(n1, k1) * Math.pow(1/2, n1);
+        let P2 = combination(n2, k2) * Math.pow(1/6, k2) * Math.pow(5/6, n2 - k2);
+
+        bothResult.innerHTML = "👉 Xác suất chung = <b>" + (P1 * P2).toFixed(6) + "</b>";
+    }
+
+</script>
+
+</body>
+</html>
